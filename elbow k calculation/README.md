@@ -47,6 +47,51 @@ current terminal directory. It contains:
 - `k_vs_Re.png` and `k_vs_Re.pdf`
 - `configuration.json` with the case, settings, and calculation definitions
 
+## Inspect cell adjacency
+
+[`elbow_mesh_adjacency_graph.py`](../elbow%20cell%20adjacency%20graph/elbow_mesh_adjacency_graph.py)
+loads a Fluent `.cas.h5` case through PyFluent, then reads its face
+connectivity to build a cell adjacency graph. Cells are graph nodes; an edge
+joins two cells that share an interior face. The script does not run iterations
+or modify the case, but it does require a working Fluent installation and
+license. See the [adjacency graph README](../elbow%20cell%20adjacency%20graph/README.md)
+for dedicated usage instructions.
+
+The script uses `ansys-fluent-core`, `h5py`, NumPy, and Matplotlib. Install
+them into the Python environment used to run the script if needed:
+
+```powershell
+python -m pip install ansys-fluent-core h5py numpy matplotlib
+```
+
+Run it from the `elbow cell adjacency graph` directory. For example:
+
+```powershell
+python .\elbow_mesh_adjacency_graph.py `
+  --case "C:\path\to\elbow_no_h2.msh.cas.h5" `
+  --cell-id 5364 --rings 1 --show
+```
+
+`--cell-id` is a one-based Fluent cell ID (default: `1`). `--rings` may be `1`
+or `2` (default: `1`). `--show` opens the saved graph in a Matplotlib window;
+without it, the script only writes files. Use `--help` for the Fluent version,
+processor-count, and output-directory options.
+
+The default output folder is `adjacency_graph_results` in the current terminal
+directory (the supplied graph preview and CSV are in that directory):
+
+- `adjacency_graph.png` shows the full adjacency matrix and the selected cell's
+  local node-link graph. The circular arrangement in the local view represents
+  graph rings, not physical cell coordinates.
+- `cell_adjacency.csv` lists interior faces with their face ID and the two
+  adjacent one-based cell IDs. The plotted matrix collapses repeated pairs
+  into one undirected edge.
+
+The graph is read from the `.cas.h5` face-owner (`c0`) and face-neighbour
+(`c1`) connectivity. Boundary faces have no second cell and are not graph
+edges. The reader supports the single-section Fluent HDF5 layout used by the
+supplied case.
+
 ## Run from the VS Code PowerShell terminal
 
 Change to this directory, set the Python executable that has both
